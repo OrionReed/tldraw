@@ -3105,9 +3105,8 @@ export class Editor extends EventEmitter<TLEventMap> {
 		}
 	}
 
-	@computed
-	private getShapesInRenderingBoundsExpanded() {
-		return this._spatialIndex.getShapesInRenderingBoundsExpanded()
+	getShapesInsideBounds(bounds: Box) {
+		return this._spatialIndex.getShapesInsideBounds(bounds)
 	}
 
 	/** @internal */
@@ -3148,7 +3147,10 @@ export class Editor extends EventEmitter<TLEventMap> {
 		// If renderingBoundsMargin is set to Infinity, then we won't cull offscreen shapes
 		const isCullingOffScreenShapes = Number.isFinite(this.renderingBoundsMargin)
 
-		const shapeInRenderingBoundsExpanded = new Set(this.getShapesInRenderingBoundsExpanded().get())
+		const renderingBoundsExpanded = this.getRenderingBoundsExpanded()
+		const shapeInRenderingBoundsExpanded = new Set(
+			this.getShapesInsideBounds(renderingBoundsExpanded)
+		)
 
 		const addShapeById = (id: TLShapeId, opacity: number, isAncestorErasing: boolean) => {
 			const shape = this.getShape(id)
