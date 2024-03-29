@@ -111,6 +111,7 @@ import { HistoryManager } from './managers/HistoryManager'
 import { ScribbleManager } from './managers/ScribbleManager'
 import { SideEffectManager } from './managers/SideEffectManager'
 import { SnapManager } from './managers/SnapManager/SnapManager'
+import { SpatialIndex } from './managers/SpatialIndex'
 import { TextManager } from './managers/TextManager'
 import { TickManager } from './managers/TickManager'
 import { UserPreferencesManager } from './managers/UserPreferencesManager'
@@ -205,6 +206,8 @@ export class Editor extends EventEmitter<TLEventMap> {
 		this.user = new UserPreferencesManager(user ?? createTLUser(), inferDarkMode ?? false)
 
 		this.getContainer = getContainer ?? (() => document.body)
+
+		this._spatialIndex = new SpatialIndex(this)
 
 		this.textMeasure = new TextManager(this)
 		this._tickManager = new TickManager(this)
@@ -3102,6 +3105,11 @@ export class Editor extends EventEmitter<TLEventMap> {
 		}
 	}
 
+	@computed
+	private getShapesInRenderingBoundsExpanded() {
+		return this._spatialIndex.getShapesInRenderingBoundsExpanded()
+	}
+
 	/** @internal */
 	getUnorderedRenderingShapes(
 		// The rendering state. We use this method both for rendering, which
@@ -3127,7 +3135,6 @@ export class Editor extends EventEmitter<TLEventMap> {
 			backgroundIndex: number
 			opacity: number
 			isCulled: boolean
-			maskedPageBounds: Box | undefined
 		}[] = []
 
 		let nextIndex = MAX_SHAPES_PER_PAGE * 2
@@ -3137,10 +3144,11 @@ export class Editor extends EventEmitter<TLEventMap> {
 		const editingShapeId = this.getEditingShapeId()
 		const selectedShapeIds = this.getSelectedShapeIds()
 		const erasingShapeIds = this.getErasingShapeIds()
-		const renderingBoundsExpanded = this.getRenderingBoundsExpanded()
 
 		// If renderingBoundsMargin is set to Infinity, then we won't cull offscreen shapes
 		const isCullingOffScreenShapes = Number.isFinite(this.renderingBoundsMargin)
+
+		const shapeInRenderingBoundsExpanded = new Set(this.getShapesInRenderingBoundsExpanded().get())
 
 		const addShapeById = (id: TLShapeId, opacity: number, isAncestorErasing: boolean) => {
 			const shape = this.getShape(id)
@@ -3150,7 +3158,6 @@ export class Editor extends EventEmitter<TLEventMap> {
 			let isCulled = false
 			let isShapeErasing = false
 			const util = this.getShapeUtil(shape)
-			const maskedPageBounds = this.getShapeMaskedPageBounds(id)
 
 			if (useEditorState) {
 				isShapeErasing = !isAncestorErasing && erasingShapeIds.includes(id)
@@ -3164,12 +3171,10 @@ export class Editor extends EventEmitter<TLEventMap> {
 					util.canUnmount(shape) &&
 					// never cull editingg shapes
 					editingShapeId !== id &&
-					// if the shape is fully outside of its parent's clipping bounds...
-					(maskedPageBounds === undefined ||
-						// ...or if the shape is outside of the expanded viewport bounds...
-						(!renderingBoundsExpanded.includes(maskedPageBounds) &&
-							// ...and if it's not selected... then cull it
-							!selectedShapeIds.includes(id)))
+					// if the shape is outside of the expanded viewport bounds...
+					!shapeInRenderingBoundsExpanded.has(id) &&
+					// ...and if it's not selected... then cull it
+					!selectedShapeIds.includes(id)
 			}
 
 			renderingShapes.push({
@@ -3180,7 +3185,6 @@ export class Editor extends EventEmitter<TLEventMap> {
 				backgroundIndex: nextBackgroundIndex,
 				opacity,
 				isCulled,
-				maskedPageBounds,
 			})
 
 			nextIndex += 1
@@ -3223,7 +3227,10 @@ export class Editor extends EventEmitter<TLEventMap> {
 	 * @public
 	 */
 	@computed getRenderingShapes() {
+		let now = Date.now()
 		const renderingShapes = this.getUnorderedRenderingShapes(true)
+		console.log('unordered took', Date.now() - now, 'ms')
+		now = Date.now()
 
 		// Its IMPORTANT that the result be sorted by id AND include the index
 		// that the shape should be displayed at. Steve, this is the past you
@@ -3235,7 +3242,9 @@ export class Editor extends EventEmitter<TLEventMap> {
 		// drain. By always sorting by 'id' we keep the shapes always in the
 		// same order; but we later use index to set the element's 'z-index'
 		// to change the "rendered" position in z-space.
-		return renderingShapes.sort(sortById)
+		const sorted = renderingShapes.sort(sortById)
+		// console.log('sorting took', Date.now() - now, 'ms')
+		return sorted
 	}
 
 	/**
@@ -8840,6 +8849,8 @@ export class Editor extends EventEmitter<TLEventMap> {
 
 		return this
 	}
+
+	_spatialIndex: SpatialIndex
 }
 
 function alertMaxShapes(editor: Editor, pageId = editor.getCurrentPageId()) {

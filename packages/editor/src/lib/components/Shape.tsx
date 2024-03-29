@@ -181,6 +181,7 @@ const CulledShape = function CulledShape<T extends TLShape>({ shapeId }: { shape
 		'set shape stuff',
 		() => {
 			const bounds = editor.getShapeGeometry(shapeId).bounds
+			if (!bounds) return
 			setStyleProperty(
 				culledRef.current,
 				'transform',

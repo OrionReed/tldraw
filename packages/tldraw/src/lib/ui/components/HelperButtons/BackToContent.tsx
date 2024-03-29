@@ -21,9 +21,10 @@ export function BackToContent() {
 			// set to true. These shapes will be on the canvas but may not be in the
 			// viewport... so we also need to narrow down the list to only shapes that
 			// are ALSO in the viewport.
-			const visibleShapes = renderingShapes.filter(
-				(s) => s.maskedPageBounds && renderingBounds.includes(s.maskedPageBounds)
-			)
+			const visibleShapes = renderingShapes.filter((s) => {
+				const maskedPageBounds = editor.getShapeMaskedPageBounds(s.id)
+				return maskedPageBounds && renderingBounds.includes(maskedPageBounds)
+			})
 			const showBackToContentNow =
 				visibleShapes.length === 0 && editor.getCurrentPageShapes().length > 0
 

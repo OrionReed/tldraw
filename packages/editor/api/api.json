@@ -7441,6 +7441,37 @@
           "preserveMemberOrder": false,
           "members": [
             {
+              "kind": "Property",
+              "canonicalReference": "@tldraw/editor!Editor#_spatialIndex:member",
+              "docComment": "",
+              "excerptTokens": [
+                {
+                  "kind": "Content",
+                  "text": "_spatialIndex: "
+                },
+                {
+                  "kind": "Reference",
+                  "text": "SpatialIndex",
+                  "canonicalReference": "@tldraw/editor!~SpatialIndex:class"
+                },
+                {
+                  "kind": "Content",
+                  "text": ";"
+                }
+              ],
+              "isReadonly": false,
+              "isOptional": false,
+              "releaseTag": "Public",
+              "name": "_spatialIndex",
+              "propertyTypeTokenRange": {
+                "startIndex": 1,
+                "endIndex": 2
+              },
+              "isStatic": false,
+              "isProtected": false,
+              "isAbstract": false
+            },
+            {
               "kind": "Constructor",
               "canonicalReference": "@tldraw/editor!Editor:constructor(1)",
               "docComment": "/**\n * Constructs a new instance of the `Editor` class\n */\n",
@@ -11955,16 +11986,7 @@
                 },
                 {
                   "kind": "Content",
-                  "text": ">;\n        index: number;\n        backgroundIndex: number;\n        opacity: number;\n        isCulled: boolean;\n        maskedPageBounds: "
-                },
-                {
-                  "kind": "Reference",
-                  "text": "Box",
-                  "canonicalReference": "@tldraw/editor!Box:class"
-                },
-                {
-                  "kind": "Content",
-                  "text": " | undefined;\n    }[]"
+                  "text": ">;\n        index: number;\n        backgroundIndex: number;\n        opacity: number;\n        isCulled: boolean;\n    }[]"
                 },
                 {
                   "kind": "Content",
@@ -11974,7 +11996,7 @@
               "isStatic": false,
               "returnTypeTokenRange": {
                 "startIndex": 1,
-                "endIndex": 12
+                "endIndex": 10
               },
               "releaseTag": "Public",
               "isProtected": false,
