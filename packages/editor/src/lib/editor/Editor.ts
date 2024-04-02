@@ -3156,7 +3156,7 @@ export class Editor extends EventEmitter<TLEventMap> {
 		const isCullingOffScreenShapes = Number.isFinite(this.renderingBoundsMargin)
 
 		const renderingBoundsExpanded = this.getRenderingBoundsExpanded()
-		const shapeInRenderingBoundsExpanded = new Set(
+		const shapeIdsInsideRenderingBounds = new Set(
 			this.getShapeIdsInsideBounds(renderingBoundsExpanded)
 		)
 
@@ -3182,7 +3182,7 @@ export class Editor extends EventEmitter<TLEventMap> {
 					// never cull editingg shapes
 					editingShapeId !== id &&
 					// if the shape is outside of the expanded viewport bounds...
-					!shapeInRenderingBoundsExpanded.has(id) &&
+					!shapeIdsInsideRenderingBounds.has(id) &&
 					// ...and if it's not selected... then cull it
 					!selectedShapeIds.includes(id)
 			}
