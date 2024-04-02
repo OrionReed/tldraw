@@ -672,6 +672,9 @@ export class Editor extends EventEmitter<TLEventMap> {
 	/** @internal */
 	private readonly _tickManager
 
+	/** @internal */
+	private readonly _spatialIndex: SpatialIndex
+
 	/**
 	 * A manager for the app's snapping feature.
 	 *
@@ -8848,8 +8851,6 @@ export class Editor extends EventEmitter<TLEventMap> {
 
 		return this
 	}
-
-	_spatialIndex: SpatialIndex
 }
 
 function alertMaxShapes(editor: Editor, pageId = editor.getCurrentPageId()) {
