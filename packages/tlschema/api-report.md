@@ -691,8 +691,8 @@ export const lineShapeProps: {
     points: T.DictValidator<string, {
         x: number;
         y: number;
-        index: IndexKey;
         id: string;
+        index: IndexKey;
     } & {}>;
 };
 
